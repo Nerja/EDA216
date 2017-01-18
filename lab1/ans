@@ -1,0 +1,113 @@
+a)
+SELECT first_name, last_name
+FROM students
+
+b)
+SELECT first_name, last_name
+FROM students
+ORDER BY last_name ASC, first_name ASC
+
+c)
+SELECT first_name, last_name, ssn
+FROM students
+WHERE ssn like '85%'
+
+d)
+SELECT first_name, last_name, ssn
+FROM students
+WHERE substr(ssn, 10, 1) % 2 = 0
+
+e)
+SELECT count(ssn)
+FROM students
+
+f)
+SELECT course_code, course_name
+FROM courses
+WHERE course_code LIKE 'FMA%'
+
+g)
+SELECT course_code, course_name, credits
+FROM courses
+WHERE credits > 7.5
+
+h)
+SELECT level, count(course_code)
+FROM courses
+GROUP BY level
+
+i)
+SELECT course_code
+FROM taken_courses
+WHERE ssn = '910101-1234'
+
+j)
+SELECT course_name, t.course_code, credits
+FROM taken_courses t, courses c
+WHERE ssn = '910101-1234'
+AND   t.course_code = c.course_code
+
+k)
+SELECT SUM(credits)
+FROM courses c, taken_courses t
+WHERE ssn = '910101-1234'
+AND   c.course_code = t.course_code
+
+l)
+SELECT AVG(grade)
+FROM taken_courses
+WHERE ssn = '910101-1234'
+
+---------------------------------------------
+m)
+mi)
+SELECT course_code
+FROM taken_courses t, students s
+WHERE first_name = 'Eva'
+AND   last_name = 'Alm'
+AND   t.ssn = s.ssn
+
+mj)
+SELECT t.course_code, course_name, credits
+FROM taken_courses t, students s, courses c
+WHERE first_name = 'Eva'
+AND   last_name = 'Alm'
+AND   t.ssn = s.ssn
+AND   t.course_code = c.course_code
+
+mk)
+SELECT SUM(credits)
+FROM taken_courses t, students s, courses c
+WHERE first_name = 'Eva'
+AND   last_name = 'Alm'
+AND   t.ssn = s.ssn
+AND   t.course_code = c.course_code
+
+ml)
+SELECT AVG(grade)
+FROM taken_courses t, students s
+WHERE first_name = 'Eva'
+AND   last_name = 'Alm'
+AND   t.ssn = s.ssn
+---------------------------------------------
+
+n)
+SELECT first_name, last_name, ssn
+FROM students
+WHERE ssn NOT IN (SELECT ssn FROM taken_courses)
+
+o)
+CREATE VIEW kings AS
+SELECT ssn, AVG(grade) avg_grade
+FROM taken_courses
+GROUP BY ssn
+
+SELECT first_name, last_name, s.ssn, avg_grade
+FROM students s, kings k
+WHERE s.ssn = k.ssn
+ORDER BY avg_grade DESC
+
+
+
+
+
