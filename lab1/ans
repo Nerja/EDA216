@@ -107,6 +107,26 @@ FROM students s, kings k
 WHERE s.ssn = k.ssn
 ORDER BY avg_grade DESC
 
+p)
+CREATE VIEW credits_table AS
+SELECT ssn, SUM(credits) total_credits
+FROM taken_courses t, courses c
+WHERE t.course_code = c.course_code
+GROUP BY ssn
+
+SELECT s.first_name, s.last_name, s.ssn, total_credits
+FROM students s, credits_table
+WHERE s.ssn = credits_table.ssn
+UNION
+SELECT s.first_name, s.last_name, s.ssn, 0
+FROM students s, credits_table
+WHERE s.ssn NOT IN (SELECT ssn FROM credits_table)
+
+q)
+SELECT ssn, first_name, last_name, COUNT()
+FROM students
+GROUP BY first_name, last_name
+HAVING COUNT() > 1
 
 
 
