@@ -35,7 +35,7 @@ CREATE TABLE Reservations (
 CREATE TABLE Performances ( 
 	movie_name	VARCHAR(32),
 	date		DATE NOT NULL,
-	free_seat	INT,
+	free_seat	INT check (free_seat >= 0),
 	theater_name	VARCHAR(32),
 	PRIMARY KEY	(movie_name, date),
 	FOREIGN KEY	(movie_name) REFERENCES Movies(name),
