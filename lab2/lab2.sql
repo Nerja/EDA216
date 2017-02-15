@@ -20,7 +20,7 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Reservations (
-	nbr		INT,
+	nbr		INTEGER,
 	username	VARCHAR(32),
 	movie_name	VARCHAR(32),
 	date		DATE NOT NULL,

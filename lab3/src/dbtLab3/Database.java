@@ -64,7 +64,7 @@ public class Database {
 
 	/* --- insert own code here --- */
 	public boolean login(String username) {
-		String sql = "SELECT username\n" + "FROM Users\n" + "WHERE username = ?";
+		String sql = "SELECT username FROM Users WHERE username = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
@@ -75,7 +75,7 @@ public class Database {
 	}
 
 	public List<String> getMovies() {
-		String sql = "SELECT name\n" + "FROM Movies";
+		String sql = "SELECT name FROM Movies";
 		List<String> movies = new LinkedList<String>();
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -89,7 +89,7 @@ public class Database {
 	}
 
 	public List<String> getDates(String movieName) {
-		String sql = "SELECT date\n" + "FROM Performances\n" + "WHERE movie_name = ?";
+		String sql = "SELECT date FROM Performances WHERE movie_name = ?";
 		List<String> dates = new LinkedList<String>();
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -105,7 +105,7 @@ public class Database {
 
 	public Performance getPerformance(String movieName, String date) {
 		Performance perf = null;
-		String sql = "SELECT *\n" + "FROM Performances\n" + "WHERE movie_name = ?\n" + "AND   date = ?";
+		String sql = "SELECT * FROM Performances WHERE movie_name = ? AND date = ?";
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, movieName);
@@ -126,7 +126,7 @@ public class Database {
 					 "WHERE movie_name = ?\n" +
 					 "AND 	date = ?\n";
 		
-		String sqlBook = "INSERT INTO Reservations(username, movie_name, date, theater_name) VALUES(?,?,?,?)";
+		String sqlBook = "INSERT INTO Reservations VALUES(NULL,?,?,?,?)";
 		
 		String sqlUpdateSeats = "UPDATE Performances SET free_seat = free_seat - 1 WHERE movie_name = ? AND date = ?";
 		
@@ -137,7 +137,7 @@ public class Database {
 			ps.setString(2, date);
 			ResultSet rs = ps.executeQuery();
 			if(rs.next() && rs.getInt("free_seat") > 0) {
-				PreparedStatement bookStmt = conn.prepareStatement(sqlBook);
+				PreparedStatement bookStmt = conn.prepareStatement(sqlBook, PreparedStatement.RETURN_GENERATED_KEYS);
 				bookStmt.setString(1, CurrentUser.instance().getCurrentUserId());
 				bookStmt.setString(2, movieName);
 				bookStmt.setString(3, date);
@@ -148,10 +148,13 @@ public class Database {
 				updateStmt.setString(1, movieName);
 				updateStmt.setString(2, date);
 				updateStmt.executeUpdate();
-				
-				PreparedStatement getTicketNbr = conn.prepareStatement("SELECT COUNT() cnt FROM Reservations");
-				rs = getTicketNbr.executeQuery();
-				nbr = rs.getInt("cnt") - 1;
+				ResultSet bookNbr = bookStmt.getGeneratedKeys();
+				if(bookNbr.next()) {
+					nbr = bookNbr.getInt(1);
+				} else {
+					conn.rollback();
+					nbr = -1;
+				}
 				conn.commit(); //transaction end ok
 			} else {
 				conn.rollback(); // rollback release
@@ -159,6 +162,9 @@ public class Database {
 			conn.setAutoCommit(true);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			try {
+				conn.rollback();
+			} catch (SQLException e1) {}
 			nbr = -1;
 		}
 		return nbr;
